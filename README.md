@@ -7,6 +7,7 @@
 - Install `wrangler`
 - `CLOUDFLARE_ACCOUNT_ID= CLOUDFLARE_API_TOKEN= wrangler publish` to publish
   - Or just push changes to GitHub and it will publish automatically
+- If you update `commands.js`, push to GitHub so that it runs `register.js` script to push changes to Discord
 - `... wrangler tail` to see logs
 - `... wrangler kv:*` commands should also work
 
