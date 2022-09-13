@@ -73,6 +73,7 @@ async function registerCommands(url) {
     console.error('Error registering commands');
     const text = await response.text();
     console.error(text);
+    process.exit(1);
   }
   return response;
 }
