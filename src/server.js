@@ -169,7 +169,7 @@ router.post('/', async (request, env) => {
           prompt: prompt,
           max_tokens: 200,
           temperature: creativity,
-          best_of: 2,
+          best_of: 1,
           stream: false,
           // stop: "\n"
         });
