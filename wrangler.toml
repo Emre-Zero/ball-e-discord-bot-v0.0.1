@@ -1,0 +1,14 @@
+name = "discord-bot"
+main = "./src/server.js"
+compatibility_date="2022-02-26"
+
+account_id = "83d3bd964aba70dde2a7c3976ec83c8f"
+workers_dev = true
+
+kv_namespaces = [
+  { binding = "KV_STORAGE", id = "14f0418dcc0a4fa5bdd260e2c2fcd24e" }
+]
+
+[[rules]]
+type = "ESModule"
+globs = [ "**/*.js" ]

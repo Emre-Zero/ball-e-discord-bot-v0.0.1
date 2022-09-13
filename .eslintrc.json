@@ -1,0 +1,14 @@
+{
+  "extends": ["prettier", "eslint:recommended"],
+  "plugins": ["prettier"],
+  "env": {
+    "serviceworker": true
+  },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": "latest"
+  },
+  "ignorePatterns": [
+    "node_modules"
+  ]
+}
