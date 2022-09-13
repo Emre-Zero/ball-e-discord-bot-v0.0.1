@@ -156,6 +156,8 @@ router.post('/', async (request, env) => {
 
         const options = message.data.options[0].options;
         const prompt = options[0].value;
+        const creativity = options[1]?.value || 0.8;
+        const model = options[2]?.value || 'text-davinci-002';
 
         const openAI = new OpenAI(
           env.OPENAI_API_KEY,
@@ -165,9 +167,9 @@ router.post('/', async (request, env) => {
 
         const completion = await openAI.complete('text-davinci-002', {
           prompt: prompt,
-          max_tokens: 150,
-          temperature: 0.8,
-          best_of: 1,
+          max_tokens: 200,
+          temperature: creativity,
+          best_of: 2,
           stream: false,
           // stop: "\n"
         });
