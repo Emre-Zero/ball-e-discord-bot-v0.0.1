@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 /* eslint-disable no-undef */
 
 const token = process.env.DISCORD_TOKEN;
-const applicationId = process.env.DISCORD_APPLICATION_ID;
+const applicationId = process.env.DISCORD_APP_ID;
 const testGuildId = process.env.DISCORD_TEST_GUILD_ID;
 
 if (!token) {
@@ -18,7 +18,7 @@ if (!token) {
 }
 if (!applicationId) {
   throw new Error(
-    'The DISCORD_APPLICATION_ID environment variable is required.'
+    'The DISCORD_APP_ID environment variable is required.'
   );
 }
 

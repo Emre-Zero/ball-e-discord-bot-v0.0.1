@@ -66,7 +66,7 @@ The production service needs access to credentials from your app:
 ```
 $ wrangler secret put DISCORD_TOKEN
 $ wrangler secret put DISCORD_PUBLIC_KEY
-$ wrangler secret put DISCORD_APPLICATION_ID
+$ wrangler secret put DISCORD_APP_ID
 $ wrangler secret put DISCORD_TEST_GUILD_ID
 ```
 
@@ -94,7 +94,7 @@ npm install
 The following command only needs to be run once:
 
 ```
-$ DISCORD_TOKEN=<your-token> DISCORD_APPLICATION_ID=<your-app-id> node src/register.js
+$ DISCORD_TOKEN=<your-token> DISCORD_APP_ID=<your-app-id> node src/register.js
 ```
 
 ### Run app
