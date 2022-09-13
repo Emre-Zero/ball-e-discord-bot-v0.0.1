@@ -44,15 +44,15 @@ export const MAIN_COMMAND = {
           "required": false,
           "choices": [
             {
-              "name": "1.0",
+              "name": "High / 1.0",
               "value": 1
             },
             {
-              "name": "0.5",
+              "name": "Med / 0.5",
               "value": 0.5
             },
             {
-              "name": "0.1",
+              "name": "Low / 0.1",
               "value": 0
             },
           ]
