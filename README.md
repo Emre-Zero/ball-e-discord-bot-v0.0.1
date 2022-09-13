@@ -2,6 +2,14 @@
 
 - Original code by [@justinbeckwith](https://twitter.com/JustinBeckwith)
 
+## Tips:
+- Clone locally
+- Install `wrangler`
+- `CLOUDFLARE_ACCOUNT_ID= CLOUDFLARE_API_TOKEN= wrangler publish` to publish
+  - Or just push changes to GitHub and it will publish automatically
+- `... wrangler tail` to see logs
+- `... wrangler kv:*` commands should also work
+
 [See similar tutorial on Discord docs.](https://discord.com/developers/docs/tutorials/hosting-on-cloudflare-workers)
 
 ## Resources used
