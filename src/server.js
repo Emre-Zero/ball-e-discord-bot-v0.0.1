@@ -182,7 +182,7 @@ router.post('/', async (request, env) => {
         return new JsonResponse({
           type: 4,
           data: {
-            content: `*${prompt}*\n**${completion?.choices[0]?.text.trim()}**`,
+            content: `**${completion?.choices[0]?.text?.trim()}**`,
           },
         });
       }
