@@ -8,7 +8,7 @@ export class OpenAI {
         // https://beta.openai.com/docs/api-reference/authentication
         this.headers = {
             'authorization': `Bearer ${apiKey}`,
-            'content-type': 'application/json',
+            'content-type': 'application/json;charset=UTF-8',
         }
 
         if (organizationId) {
