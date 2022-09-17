@@ -1,27 +1,24 @@
-const baseUrl = 'https://api.openai.com'
+const baseUrl = 'https://discord.com/api';
 
-export class OpenAI {
+export class DiscordAPI {
     url;
     headers;
+    appId;
 
-    constructor(apiKey, organizationId, version) {
-        // https://beta.openai.com/docs/api-reference/authentication
+    constructor(botToken, appId, version = 'v10') {
+        // https://discord.com/developers/docs/reference#authentication
         this.headers = {
-            'authorization': `Bearer ${apiKey}`,
+            'authorization': `Bot ${botToken}`,
             'content-type': 'application/json;charset=UTF-8',
         }
-
-        if (organizationId) {
-            this.headers['openai-organization'] = organizationId
-        }
-
+        this.appId = appId;
         this.url = `${baseUrl}/${version}`
     }
 
-    // https://beta.openai.com/docs/api-reference/completions/create
-    complete(model, options) {
-        options.model = model;
-        return this.request(`/completions`, 'POST', options)
+    // https://discord.com/developers/docs/interactions/receiving-and-responding#followup-messages
+    followUpMessage(token, params) {
+        // /webhooks/<application_id>/<interaction_token>/messages/@original
+        return this.request(`/webhooks/${this.appId}/${token}`, 'POST', params)
     }
 
     async requestRaw(path, method, body) {
@@ -50,7 +47,7 @@ export class OpenAI {
                 }
             }
 
-            throw new Error(`OpenAI API request failed: ${response.status} --- Message: ${errorBody}`)
+            throw new Error(`Discord API request failed: ${response.status} --- Error: ${errorBody}`)
         }
 
         return response

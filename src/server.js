@@ -10,6 +10,7 @@ import {
 } from 'discord-interactions';
 import { MAIN_COMMAND } from './commands.js';
 import { OpenAI } from './openai-api.js';
+import {DiscordAPI} from "./discord-api.js";
 
 
 class JsonResponse extends Response {
@@ -57,7 +58,7 @@ router.get('/', (request, env) => {
  * include a JSON payload described here:
  * https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
  */
-router.post('/', async (request, env) => {
+router.post('/', async (request, env, context) => {
   const message = await request.json();
   console.log('message', message);
   if (message.type === InteractionType.PING) {
@@ -154,6 +155,7 @@ router.post('/', async (request, env) => {
       case "ai": {
         console.log('Handling AI command');
 
+        const msgToken = message.token;
         const options = message.data.options[0].options;
         const prompt = options[0].value;
         const creativity = options[1]?.value || 0.8;
@@ -165,25 +167,43 @@ router.post('/', async (request, env) => {
           'v1'
         );
 
-        const completion = await openAI.complete('text-davinci-002', {
-          prompt: prompt,
-          max_tokens: 200,
-          temperature: creativity,
-          best_of: 1,
-          stream: false,
-          // stop: "\n"
-        });
+        const discordAPI = new DiscordAPI(
+            env.DISCORD_TOKEN,
+            env.DISCORD_APP_ID,
+        );
 
         console.log({
           prompt,
-          completion
-        })
+          creativity,
+          model
+        });
+
+        // Perform the API calls *after* responding to Discord webhook event
+        // As Discord bots must respond within 3 seconds
+        context.waitUntil(
+            openAI.complete(model, {
+              prompt: prompt,
+              max_tokens: 200,
+              temperature: creativity,
+              best_of: 1,
+              stream: false,
+              // stop: "\n"
+            }).then((result) => {
+              console.log('OpenAI result', result);
+              discordAPI.followUpMessage(msgToken, {
+                content: `**${result?.choices[0]?.text?.trim()}**`,
+              });
+            }).catch((error) => {
+              // OpenAI error
+              discordAPI.followUpMessage(msgToken, {
+                content: `Error: ${error.message}`,
+              });
+            })
+        );
 
         return new JsonResponse({
-          type: 4,
-          data: {
-            content: `**${completion?.choices[0]?.text?.trim()}**`,
-          },
+          // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
+          type: 5, // DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
         });
       }
       default:
@@ -203,9 +223,10 @@ export default {
    * Verify the signature with the request, and dispatch to the router.
    * @param {*} request A Fetch Request object
    * @param {*} env A map of key/value pairs with env vars and secrets from the cloudflare env.
+   * @param context
    * @returns
    */
-  async fetch(request, env) {
+  async fetch(request, env, context) {
     if (request.method === 'POST') {
       // Using the incoming headers, verify this request actually came from discord.
       const signature = request.headers.get('x-signature-ed25519');
@@ -225,6 +246,6 @@ export default {
     }
 
     // Dispatch the request to the appropriate route
-    return router.handle(request, env);
+    return router.handle(request, env, context);
   },
 };
