@@ -1,5 +1,5 @@
-import { MAIN_COMMAND } from './commands.js';
-import fetch from 'node-fetch';
+import { MAIN_COMMAND } from "./commands.js";
+import fetch from "node-fetch";
 
 /**
  * This file is meant to be run from the command line, and is not used by the
@@ -14,12 +14,10 @@ const applicationId = process.env.DISCORD_APP_ID;
 const testGuildId = process.env.DISCORD_TEST_GUILD_ID;
 
 if (!token) {
-  throw new Error('The DISCORD_TOKEN environment variable is required.');
+  throw new Error("The DISCORD_TOKEN environment variable is required.");
 }
 if (!applicationId) {
-  throw new Error(
-    'The DISCORD_APP_ID environment variable is required.'
-  );
+  throw new Error("The DISCORD_APP_ID environment variable is required.");
 }
 
 /**
@@ -30,7 +28,7 @@ if (!applicationId) {
 async function registerGuildCommands() {
   if (!testGuildId) {
     throw new Error(
-      'The DISCORD_TEST_GUILD_ID environment variable is required.'
+      "The DISCORD_TEST_GUILD_ID environment variable is required.",
     );
   }
   const url = `https://discord.com/api/v10/applications/${applicationId}/guilds/${testGuildId}/commands`;
@@ -39,7 +37,7 @@ async function registerGuildCommands() {
   console.log(json);
   json.forEach(async (cmd) => {
     const response = await fetch(
-      `https://discord.com/api/v10/applications/${applicationId}/guilds/${testGuildId}/commands/${cmd.id}`
+      `https://discord.com/api/v10/applications/${applicationId}/guilds/${testGuildId}/commands/${cmd.id}`,
     );
     if (!response.ok) {
       console.error(`Problem removing command ${cmd.id}`);
@@ -60,17 +58,17 @@ async function registerGlobalCommands() {
 async function registerCommands(url) {
   const response = await fetch(url, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bot ${token}`,
     },
-    method: 'PUT',
+    method: "PUT",
     body: JSON.stringify([MAIN_COMMAND]),
   });
 
   if (response.ok) {
-    console.log('Registered all commands');
+    console.log("Registered all commands");
   } else {
-    console.error('Error registering commands');
+    console.error("Error registering commands");
     const text = await response.text();
     console.error(text);
     process.exit(1);

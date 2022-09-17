@@ -10,8 +10,7 @@ import {
 } from 'discord-interactions';
 import { MAIN_COMMAND } from './commands.js';
 import { OpenAI } from './openai-api.js';
-import {DiscordAPI} from "./discord-api.js";
-
+import { DiscordAPI } from './discord-api.js';
 
 class JsonResponse extends Response {
   constructor(body, init) {
@@ -28,21 +27,21 @@ class JsonResponse extends Response {
 const router = Router();
 
 const items = {
-  "taco": {
-    "name": "Taco 🌮",
-    "emoji": "🌮",
+  taco: {
+    name: 'Taco 🌮',
+    emoji: '🌮',
   },
-  "doner": {
-    "name": "Döner Kebab 🥙",
-    "emoji": "🥙",
+  doner: {
+    name: 'Döner Kebab 🥙',
+    emoji: '🥙',
   },
-  "cookie": {
-    "name": "Cookie 🍪",
-    "emoji": "🍪",
+  cookie: {
+    name: 'Cookie 🍪',
+    emoji: '🍪',
   },
-  "beer": {
-    "name": "Beer 🍺",
-    "emoji": "🍺",
+  beer: {
+    name: 'Beer 🍺',
+    emoji: '🍺',
   },
 };
 
@@ -73,7 +72,7 @@ router.post('/', async (request, env, context) => {
   if (message.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
     switch (message.data.options[0].name.toLowerCase()) {
-      case "thank": {
+      case 'thank': {
         console.log('Handling thank command');
 
         const options = message.data.options[0].options;
@@ -105,9 +104,7 @@ router.post('/', async (request, env, context) => {
 
         // Determine new score
         const newScore =
-          action === 'give'
-            ? currentScore + 1
-            : currentScore - 1;
+          action === 'give' ? currentScore + 1 : currentScore - 1;
 
         const newMemberScore =
           action === 'give'
@@ -127,19 +124,19 @@ router.post('/', async (request, env, context) => {
           itemName,
           currentScore,
           newScore,
-        })
+        });
 
         // Save new score
         await env.KV_STORAGE.put(storageTargetKey, newScore, {
           metadata: {
-            userId: targetUserId
+            userId: targetUserId,
           },
         });
 
         if (action === 'steal') {
           await env.KV_STORAGE.put(storageMemberKey, newMemberScore, {
             metadata: {
-              userId: memberUserId
+              userId: memberUserId,
             },
           });
         }
@@ -152,7 +149,7 @@ router.post('/', async (request, env, context) => {
           },
         });
       }
-      case "ai": {
+      case 'ai': {
         console.log('Handling AI command');
 
         const msgToken = message.token;
@@ -161,39 +158,38 @@ router.post('/', async (request, env, context) => {
         const creativity = options[1]?.value || 0.8;
         const model = options[2]?.value || 'text-davinci-002';
 
-        const openAI = new OpenAI(
-          env.OPENAI_API_KEY,
-          env.OPENAI_ORG_ID,
-          'v1'
-        );
+        const openAI = new OpenAI(env.OPENAI_API_KEY, env.OPENAI_ORG_ID, 'v1');
 
         const discordAPI = new DiscordAPI(
-            env.DISCORD_TOKEN,
-            env.DISCORD_APP_ID,
+          env.DISCORD_TOKEN,
+          env.DISCORD_APP_ID
         );
 
         console.log({
           prompt,
           creativity,
-          model
+          model,
         });
 
         // Perform the API calls *after* responding to Discord webhook event
         // As Discord bots must respond within 3 seconds
         context.waitUntil(
-            openAI.complete(model, {
+          openAI
+            .complete(model, {
               prompt: prompt,
               max_tokens: 200,
               temperature: creativity,
               best_of: 1,
               stream: false,
               // stop: "\n"
-            }).then((result) => {
+            })
+            .then((result) => {
               console.log('OpenAI result', result);
               discordAPI.followUpMessage(msgToken, {
                 content: `**${result?.choices[0]?.text?.trim()}**`,
               });
-            }).catch((error) => {
+            })
+            .catch((error) => {
               // OpenAI error
               discordAPI.followUpMessage(msgToken, {
                 content: `Error: ${error.message}`,
