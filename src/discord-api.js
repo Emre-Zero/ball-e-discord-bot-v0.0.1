@@ -16,7 +16,7 @@ export class DiscordAPI {
   }
 
   // https://discord.com/developers/docs/interactions/receiving-and-responding#followup-messages
-  followUpMessage(token, params) {
+  async followUpMessage(token, params) {
     // /webhooks/<application_id>/<interaction_token>/messages/@original
     return this.request(`/webhooks/${this.appId}/${token}`, "POST", params);
   }

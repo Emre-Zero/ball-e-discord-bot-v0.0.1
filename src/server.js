@@ -183,16 +183,27 @@ router.post('/', async (request, env, context) => {
               stream: false,
               // stop: "\n"
             })
-            .then((result) => {
+            .then(async (result) => {
               console.log('OpenAI result', result);
-              discordAPI.followUpMessage(msgToken, {
-                content: `**${result?.choices[0]?.text?.trim()}**`,
+
+              if (!result || !result.choices || !result.choices[0]) {
+                throw new Error(`Invalid result from OpenAI: ${JSON.stringify(result)}`);
+              }
+              let aiText = result.choices[0].text;
+
+              const discordResult = await discordAPI.followUpMessage(msgToken, {
+                content: `\`${prompt}\`${aiText}`,
+              }).catch((err) => {
+                console.error('Discord API error', err);
               });
+
+              console.log('Discord API result', discordResult);
             })
-            .catch((error) => {
+            .catch((err) => {
               // OpenAI error
+              console.error('OpenAI error', err);
               discordAPI.followUpMessage(msgToken, {
-                content: `Error: ${error.message}`,
+                content: `Error: ${err.message}`,
               });
             })
         );
