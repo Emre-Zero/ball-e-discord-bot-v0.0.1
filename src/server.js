@@ -153,10 +153,19 @@ router.post('/', async (request, env, context) => {
         console.log('Handling AI command');
 
         const msgToken = message.token;
-        const options = message.data.options[0].options;
-        const prompt = options[0].value;
-        const creativity = options[1]?.value || 0.8;
-        const model = options[2]?.value || 'text-davinci-002';
+        const rawOptions = message.data.options[0].options;
+
+        // Re-index by names to easily identify
+        const options = {};
+        rawOptions.forEach((option) => {
+          options[option.name] = option;
+        });
+
+        const prompt = options['prompt'].value;
+        // Optional ones below (set default values)
+        const creativity = options['creativity']?.value || 0.8;
+        const model = options['model']?.value || 'text-davinci-002';
+        const showPrompt = options['show-prompt']?.value === undefined ? true : options['show-prompt']?.value;
 
         const openAI = new OpenAI(env.OPENAI_API_KEY, env.OPENAI_ORG_ID, 'v1');
 
@@ -169,6 +178,7 @@ router.post('/', async (request, env, context) => {
           prompt,
           creativity,
           model,
+          showPrompt,
         });
 
         // Perform the API calls *after* responding to Discord webhook event
@@ -190,9 +200,10 @@ router.post('/', async (request, env, context) => {
                 throw new Error(`Invalid result from OpenAI: ${JSON.stringify(result)}`);
               }
               let aiText = result.choices[0].text;
+              let output = showPrompt ? `\`${prompt}\`${aiText}` : aiText.trim();
 
               const discordResult = await discordAPI.followUpMessage(msgToken, {
-                content: `\`${prompt}\`${aiText}`,
+                content: output,
               }).catch((err) => {
                 console.error('Discord API error', err);
               });

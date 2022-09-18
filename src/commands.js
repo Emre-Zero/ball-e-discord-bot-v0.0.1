@@ -81,6 +81,22 @@ export const MAIN_COMMAND = {
             },
           ],
         },
+        {
+          name: "show-prompt",
+          description: "Show the inputted prompt?",
+          type: 4, // Int
+          required: false,
+          choices: [
+            {
+              name: "yes",
+              value: true,
+            },
+            {
+              name: "no",
+              value: false,
+            },
+          ],
+        },
       ],
     },
     // Fun cmd
