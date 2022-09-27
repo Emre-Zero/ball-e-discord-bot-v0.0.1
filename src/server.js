@@ -200,7 +200,7 @@ router.post('/', async (request, env, context) => {
                 throw new Error(`Invalid result from OpenAI: ${JSON.stringify(result)}`);
               }
               let aiText = result.choices[0].text;
-              let output = showPrompt ? `\`${prompt}\`${aiText}` : aiText.trim();
+              let output = showPrompt ? prompt + "```\n" + aiText + "\n```" : "```\n" + aiText.trim() + "\n```";
 
               const discordResult = await discordAPI.followUpMessage(msgToken, {
                 content: output,
