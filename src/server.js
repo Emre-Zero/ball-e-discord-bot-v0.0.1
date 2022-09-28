@@ -206,8 +206,8 @@ router.post("/", async (request, env, context) => {
               }
               let aiText = result.choices[0].text;
               let output = showPrompt
-                ? `\`${prompt}\`` + " ```plaintext\n" + aiText + "\n```"
-                : "```plaintext\n" + aiText.trim() + "\n```";
+                ? "```markdown\n# " + prompt + "..." + aiText + "\n```"
+                : "```markdown\n" + aiText.trim() + "\n```";
 
               const discordResult = await discordAPI
                 .followUpMessage(msgToken, {
