@@ -2,22 +2,22 @@
  * The core server that runs on a Cloudflare worker.
  */
 
-import { Router } from 'itty-router';
+import { Router } from "itty-router";
 import {
   InteractionResponseType,
   InteractionType,
   verifyKey,
-} from 'discord-interactions';
-import { MAIN_COMMAND } from './commands.js';
-import { OpenAI } from './openai-api.js';
-import { DiscordAPI } from './discord-api.js';
+} from "discord-interactions";
+import { MAIN_COMMAND } from "./commands.js";
+import { OpenAI } from "./openai-api.js";
+import { DiscordAPI } from "./discord-api.js";
 
 class JsonResponse extends Response {
   constructor(body, init) {
     const jsonBody = JSON.stringify(body);
     init = init || {
       headers: {
-        'content-type': 'application/json;charset=UTF-8',
+        "content-type": "application/json;charset=UTF-8",
       },
     };
     super(jsonBody, init);
@@ -28,27 +28,27 @@ const router = Router();
 
 const items = {
   taco: {
-    name: 'Taco 🌮',
-    emoji: '🌮',
+    name: "Taco 🌮",
+    emoji: "🌮",
   },
   doner: {
-    name: 'Döner Kebab 🥙',
-    emoji: '🥙',
+    name: "Döner Kebab 🥙",
+    emoji: "🥙",
   },
   cookie: {
-    name: 'Cookie 🍪',
-    emoji: '🍪',
+    name: "Cookie 🍪",
+    emoji: "🍪",
   },
   beer: {
-    name: 'Beer 🍺',
-    emoji: '🍺',
+    name: "Beer 🍺",
+    emoji: "🍺",
   },
 };
 
 /**
  * A simple :wave: hello page to verify the worker is working.
  */
-router.get('/', (request, env) => {
+router.get("/", (request, env) => {
   return new Response(`👋 ${env.DISCORD_APP_ID}`);
 });
 
@@ -57,13 +57,13 @@ router.get('/', (request, env) => {
  * include a JSON payload described here:
  * https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
  */
-router.post('/', async (request, env, context) => {
+router.post("/", async (request, env, context) => {
   const message = await request.json();
-  console.log('message', message);
+  console.log("message", message);
   if (message.type === InteractionType.PING) {
     // The `PING` message is used during the initial webhook handshake, and is
     // required to configure the webhook in the developer portal.
-    console.log('Handling Ping request');
+    console.log("Handling Ping request");
     return new JsonResponse({
       type: InteractionResponseType.PONG,
     });
@@ -72,8 +72,8 @@ router.post('/', async (request, env, context) => {
   if (message.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
     switch (message.data.options[0].name.toLowerCase()) {
-      case 'thank': {
-        console.log('Handling thank command');
+      case "thank": {
+        console.log("Handling thank command");
 
         const options = message.data.options[0].options;
 
@@ -104,16 +104,16 @@ router.post('/', async (request, env, context) => {
 
         // Determine new score
         const newScore =
-          action === 'give' ? currentScore + 1 : currentScore - 1;
+          action === "give" ? currentScore + 1 : currentScore - 1;
 
         const newMemberScore =
-          action === 'give'
+          action === "give"
             ? Math.max(currentMemberScore - 1, 0)
             : currentMemberScore + 1;
 
-        const emoji = action === 'give' ? '' : '';
+        const emoji = action === "give" ? "" : "";
         const begin =
-          action === 'give'
+          action === "give"
             ? `**${memberName}** gave a ${itemName} to **${targetName}** ${emoji}`
             : `**${memberName}** stole a ${itemName} from **${targetName}** ${emoji}`;
 
@@ -133,7 +133,7 @@ router.post('/', async (request, env, context) => {
           },
         });
 
-        if (action === 'steal') {
+        if (action === "steal") {
           await env.KV_STORAGE.put(storageMemberKey, newMemberScore, {
             metadata: {
               userId: memberUserId,
@@ -149,8 +149,8 @@ router.post('/', async (request, env, context) => {
           },
         });
       }
-      case 'ai': {
-        console.log('Handling AI command');
+      case "ai": {
+        console.log("Handling AI command");
 
         const msgToken = message.token;
         const rawOptions = message.data.options[0].options;
@@ -161,17 +161,20 @@ router.post('/', async (request, env, context) => {
           options[option.name] = option;
         });
 
-        const prompt = options['prompt'].value;
+        const prompt = options["prompt"].value;
         // Optional ones below (set default values)
-        const creativity = options['creativity']?.value || 0.8;
-        const model = options['model']?.value || 'text-davinci-002';
-        const showPrompt = options['show-prompt']?.value === undefined ? true : options['show-prompt']?.value;
+        const creativity = options["creativity"]?.value || 0.8;
+        const model = options["model"]?.value || "text-davinci-002";
+        const showPrompt =
+          options["show-prompt"]?.value === undefined
+            ? true
+            : options["show-prompt"]?.value;
 
-        const openAI = new OpenAI(env.OPENAI_API_KEY, env.OPENAI_ORG_ID, 'v1');
+        const openAI = new OpenAI(env.OPENAI_API_KEY, env.OPENAI_ORG_ID, "v1");
 
         const discordAPI = new DiscordAPI(
           env.DISCORD_TOKEN,
-          env.DISCORD_APP_ID
+          env.DISCORD_APP_ID,
         );
 
         console.log({
@@ -194,29 +197,38 @@ router.post('/', async (request, env, context) => {
               // stop: "\n"
             })
             .then(async (result) => {
-              console.log('OpenAI result', result);
+              console.log("OpenAI result", result);
 
               if (!result || !result.choices || !result.choices[0]) {
-                throw new Error(`Invalid result from OpenAI: ${JSON.stringify(result)}`);
+                throw new Error(
+                  `Invalid result from OpenAI: ${JSON.stringify(result)}`,
+                );
               }
               let aiText = result.choices[0].text;
-              let output = showPrompt ? `\`${prompt}\`` + " ```plaintext\n" + aiText + "\n```" : "```plaintext\n" + aiText.trim() + "\n```";
+              let output = showPrompt
+                ? `\`${prompt}\`` + " ```plaintext\n" + aiText + "\n```"
+                : "```plaintext\n" + aiText.trim() + "\n```";
 
-              const discordResult = await discordAPI.followUpMessage(msgToken, {
-                content: output,
-              }).catch((err) => {
-                console.error('Discord API error', err?.message || err || 'Unknown error');
-              });
+              const discordResult = await discordAPI
+                .followUpMessage(msgToken, {
+                  content: output,
+                })
+                .catch((err) => {
+                  console.error(
+                    "Discord API error",
+                    err?.message || err || "Unknown error",
+                  );
+                });
 
-              console.log('Discord API result', discordResult);
+              console.log("Discord API result", discordResult);
             })
             .catch((err) => {
               // OpenAI error
-              console.error('OpenAI error', err);
+              console.error("OpenAI error", err);
               discordAPI.followUpMessage(msgToken, {
                 content: `Error: ${err.message}`,
               });
-            })
+            }),
         );
 
         return new JsonResponse({
@@ -225,15 +237,15 @@ router.post('/', async (request, env, context) => {
         });
       }
       default:
-        console.error('Unknown Command');
-        return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
+        console.error("Unknown Command");
+        return new JsonResponse({ error: "Unknown Type" }, { status: 400 });
     }
   }
 
-  console.error('Unknown Type');
-  return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
+  console.error("Unknown Type");
+  return new JsonResponse({ error: "Unknown Type" }, { status: 400 });
 });
-router.all('*', () => new Response('Not Found.', { status: 404 }));
+router.all("*", () => new Response("Not Found.", { status: 404 }));
 
 export default {
   /**
@@ -245,21 +257,21 @@ export default {
    * @returns
    */
   async fetch(request, env, context) {
-    if (request.method === 'POST') {
+    if (request.method === "POST") {
       // Using the incoming headers, verify this request actually came from discord.
-      const signature = request.headers.get('x-signature-ed25519');
-      const timestamp = request.headers.get('x-signature-timestamp');
+      const signature = request.headers.get("x-signature-ed25519");
+      const timestamp = request.headers.get("x-signature-timestamp");
       console.log(signature, timestamp, env.DISCORD_PUBLIC_KEY);
       const body = await request.clone().arrayBuffer();
       const isValidRequest = verifyKey(
         body,
         signature,
         timestamp,
-        env.DISCORD_PUBLIC_KEY
+        env.DISCORD_PUBLIC_KEY,
       );
       if (!isValidRequest) {
-        console.error('Invalid Request');
-        return new Response('Bad request signature.', { status: 401 });
+        console.error("Invalid Request");
+        return new Response("Bad request signature.", { status: 401 });
       }
     }
 
