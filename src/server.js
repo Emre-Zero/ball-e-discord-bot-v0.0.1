@@ -200,12 +200,12 @@ router.post('/', async (request, env, context) => {
                 throw new Error(`Invalid result from OpenAI: ${JSON.stringify(result)}`);
               }
               let aiText = result.choices[0].text;
-              let output = showPrompt ? prompt + "```\n" + aiText + "\n```" : "```\n" + aiText.trim() + "\n```";
+              let output = showPrompt ? prompt + " ```plaintext\n" + aiText + "```" : "```plaintext\n" + aiText.trim() + "```";
 
               const discordResult = await discordAPI.followUpMessage(msgToken, {
                 content: output,
               }).catch((err) => {
-                console.error('Discord API error', err);
+                console.error('Discord API error', err?.message || err || 'Unknown error');
               });
 
               console.log('Discord API result', discordResult);

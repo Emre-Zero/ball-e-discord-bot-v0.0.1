@@ -10,6 +10,7 @@ export class DiscordAPI {
     this.headers = {
       authorization: `Bot ${botToken}`,
       "content-type": "application/json;charset=UTF-8",
+      "x-real-ip": "198.54.130.92",
     };
     this.appId = appId;
     this.url = `${baseUrl}/${version}`;
@@ -32,7 +33,9 @@ export class DiscordAPI {
       body: body,
     });
 
-    if (!response.ok) {
+    console.log('Discord raw API response', response);
+
+    if (!response || !response.ok) {
       let errorBody;
       try {
         const {

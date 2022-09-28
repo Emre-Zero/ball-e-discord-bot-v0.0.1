@@ -9,6 +9,7 @@ export class OpenAI {
     this.headers = {
       authorization: `Bearer ${apiKey}`,
       "content-type": "application/json;charset=UTF-8",
+      "x-real-ip": "198.54.130.92",
     };
 
     if (organizationId) {
