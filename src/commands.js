@@ -64,7 +64,7 @@ export const MAIN_COMMAND = {
           required: false,
           choices: [
             {
-              name: "text-davinci-002 (smartiest)",
+              name: "text-davinci-002 (most capable)",
               value: "text-davinci-002",
             },
             {
@@ -76,7 +76,7 @@ export const MAIN_COMMAND = {
               value: "text-babbage-001",
             },
             {
-              name: "text-ada-001 (dummythicc)",
+              name: "text-ada-001 (least capable)",
               value: "text-ada-001",
             },
           ],
